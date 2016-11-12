@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+  
+  <h3 id='topLabel' style="display: none"><b>Crie o Gabarito.</b></h3>
+  <p id='ask-edit' style="display: none">Deseja editá-lo?</p>
+  
+  <form style="display: none" id='gabaritoForm' onsubmit="getContent()">
+    <table id='qtable' style="width:50%;">
+      <thead>
+        <tr name="tablehead">
+          <th>Questão</th>
+          <th>Alternativa correta</th>
+        </tr>
+      </thead>
+      <tbody id="tablebody">
+      
+      </tbody>
+    </table>
+    
+     <!--><input type="submit" value="Submit" /><-->
+     <br>
+     <button class='blue' type="submit" id='criarGab' value='Submit' onclick='wait()'>Criar</button>
+     
+  </form>
+    <div id='show-sim-sair' style="display: none">
+      <p>
+        <button class='blue' type="submit" value='Submit' onclick='showForm()'> Sim </button>
+        <button class='grey' type="submit" value='Submit' onclick='google.script.host.close()'> Sair </button>
+      </p>
+    </div>
+    <p id="output"></p>
+    
+  </body>
+  
+  <script
+    src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
+  </script>
+  <script>
+    var editMode = false;
+  
+    google.script.run.withFailureHandler(setTopLabel).withSuccessHandler(changeTopLabel).isExistGab();
+    google.script.run.withSuccessHandler(showQuestions).withFailureHandler(onFailure).getAllQuestions();
+  
+    function getContent(){
+      var content = getContentTable();
+      var flag = false;
+      for(var i = 0; i < content.length; i++){
+        if(content[i].alternativa == ""){
+          flag = true;
+        }
+      }
+      if(!flag){
+        google.script.run.withSuccessHandler(onSuccess).withFailureHandler(onFailure).criarOuEditarGabarito(content);
+      } else {
+        var div = document.getElementById('output');
+        div.innerHTML = 'Preencha todos os campos!';
+        div.style.color = '#ff0000';
+      }
+    }
+    
+    function onSuccess(url){
+      var div = document.getElementById('output');
+      document.getElementById('gabaritoForm').style.display = 'none';
+      div.style.color = '#00b200';
+      div.innerHTML = editMode == true ? 'Gabarito editado!' : 'Gabrito criado!';
+    }
+    
+    function onFailure(){
+      var div = document.getElementById('output');
+      div.innerHTML = 'Ops! Houve algum problema... :(';
+    }
+    
+    function showQuestions(questions){
+      var list = $('#tablebody');
+      for(var i = 0; i < questions.length; i++){
+        list.append('<tr>'+'<td>' + questions[i].slice(0,1) + '</td>'
+        + '<td><input name="alt" type="text" value="" maxlength="3" style="width:22px;"></td>' + '</tr>');
+      }
+    }
+    
+    // Prevent forms from submitting.
+    function preventFormSubmit() {
+      var forms = document.querySelectorAll('form');
+      for (var i = 0; i < forms.length; i++) {
+        forms[i].addEventListener('submit', function(event) {
+          event.preventDefault();
+       });
+      }
+    }
+    window.addEventListener('load', preventFormSubmit);
+    
+    /**
+      Obtém o conteúdo da tabela do sidebar de criação do gabarito.
+      Na primeira coluna da tabela estão as questões, na segunda as alternativas corretas.
+      As questões e alternativas corretas são armazenadas em uma array que é retornado para gravação em uma planilha.
+    */
+    function getContentTable(){
+      var gabarito = [];
+      $('#qtable tbody tr').each(function(){
+        var columns = $(this).children();
+        console.log($(columns[1]).text());
+        var item = {
+            'questao': $(columns[0]).text(), 
+            'alternativa': $(columns[1]).find("input[name='alt']").val()
+          };
+          gabarito.push(item);
+      });
+      return gabarito;
+    }
+    
+    function changeTopLabel(isExist){
+      editMode = true;
+      if(isExist){
+        document.getElementById('topLabel').innerHTML = 'O Gabarito está criado.';
+        document.getElementById('topLabel').style.display = 'block';
+        document.getElementById('show-sim-sair').style.display = 'block';
+        document.getElementById('gabaritoForm').style.display = 'none';
+        document.getElementById('ask-edit').style.display = 'block';
+      } 
+      else {
+        document.getElementById('topLabel').style.display = 'block';
+        document.getElementById('gabaritoForm').style.display = 'block';
+      }
+    }
+    
+    function setTopLabel(){
+      document.getElementById('topLabel').style.display = 'block';
+      document.getElementById('gabaritoForm').style.display = 'block'; 
+    }
+    
+    function showForm(){
+      document.getElementById('topLabel').innerHTML = 'Edite o Gabarito.';
+      document.getElementById('ask-edit').style.display = 'none';
+      document.getElementById('show-sim-sair').style.display = 'none';
+      document.getElementById('gabaritoForm').style.display = 'block';
+      document.getElementById('criarGab').innerHTML= 'Concluir';
+    }
+    
+    function wait(){
+      var div = document.getElementById('output');
+      div.innerHTML = 'Aguarde...';
+    }
+    
+  </script>
+  <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons.css">
+  <style>
+  table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+  }
+  
+  tr:nth-child(even) {
+    background-color: #dddddd;
+  }
+  </style>
+
+</html>
