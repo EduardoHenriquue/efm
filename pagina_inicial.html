@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+  </head>
+  <body>
+<link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons.css">
+
+<div class='block-confirm' id='block-confirm'>
+  <hr style="color: #DBDBDB;"/>
+  
+  <!--><h3> <b> Acione a correção do exercício </b> </h3><-->
+  <div id='block-load' style="display: block;" style="margin-bottom: 10px;">
+    <!-->
+    <label> Gabarito: </label>
+    <button class='gray' onclick='getOAuthToken();'>Selecionar planilha</button>
+    <button class='gray' onclick='loadGabarito();'>Carregar Gabarito</button>
+    <-->
+    <h3 id='resultado'> Carregando Gabarito...</h3>    
+  </div>
+  <h3 id='cancel' style="display: none; color: #ff0000;"> Busca cancelada! </h3>
+  <div id='block-correcao' style="display: none;">
+    <label id='label-confirm'> Confirme para iniciar a correção. </label>
+    <button class='blue' type="submit" id='confirm' value='Confirmar' onclick='run()'>Confirmar</button>
+    <h3 id='result-confirm' style="display: none;"></h3>
+  </div>
+  
+  <!-- Informações de uso -->
+  
+  <br>
+  <hr style="color: #DBDBDB;"/>
+  <div>
+  <br>
+  <h3> <b> Informações de uso </b> </h3>
+  <p>
+  Esta ferramenta realiza a correção de exercícios de <b>múltipla escolha</b> criados com o Google Formulários. O exercício deve conter APENAS questões do tipo
+  <b>Múltipla Escolha</b>.
+  </p>
+  <p>
+  <b> Observação: </b><br> Para que a ferramenta funcione corretamente, siga as instruções de criação de <b>exercício</b> corretamente.
+  </p>
+  <p>
+  <b>Criação do Exercício e do Gabarito</b>
+  </p>
+  <p>
+  <b>1. Crie o Exercício seguindo corretamente as etapas abaixo:</b>
+  <br>
+  </p>
+  
+  <ul>
+  <li>
+  Passo 1: Adicione uma caixa de texto para que o respondente insira o e-mail que ele deseja receber o feedback da correção.
+  </li>
+  <li>
+  Passo 2: Enumere cada questão de Múltipla Escolha. A questão deverá iniciar-se com um número, como em um exercício comum. 
+  </li>
+  <li>
+  Passo 3: Cada alternativa deverá iniciar-se com uma letra, como é um exercício comum.
+  </li>
+  </ul>
+  <p>
+  <b> Exemplo de questão:</b>
+  <br> 1) Quem descobriu o brasil?
+  </p>
+  <ul>
+  <li> A. Américo Vespúcio</li>
+  <li> B. Pedro Álvares Cabral</li>
+  <li> C. Marechal Deodoro da Fonseca</li>
+  </ul>
+   
+  <p><br>
+  <b>2. Crie o Gabarito selecionando a opção "Criar/Editar Gabarito" no menu da ferramenta.</b>
+  <br>
+  </p>
+  </div>
+</div>
+</body>
+<!-- Script que faz a chamada para a seleção da planilha -->
+
+<script type="text/javascript">
+  
+  function run(){  
+    document.getElementById('result-confirm').style.display = 'block';
+    document.getElementById('confirm').style.display = 'none';
+    document.getElementById('label-confirm').style.display = 'none';
+    document.getElementById('result-confirm').innerHTML = 'Corrigindo...';
+    google.script.run.withSuccessHandler(onSuccess).withFailureHandler(onFailure).corrigirExercicio();
+  }
+  
+  google.script.run.withFailureHandler(onFailureLoadGab).withSuccessHandler(loadGabarito).isExistGab();
+  
+  function loadGabarito(isExist){
+    if(isExist != null){
+      document.getElementById('block-correcao').style.display = 'block';
+      document.getElementById('resultado').style.color = '#00b200';
+      document.getElementById('resultado').innerHTML = 'Gabarito carregado com sucesso!';
+      document.getElementById('resultado').style.display = 'block';
+    } else {
+      document.getElementById('block-load').style.display = 'none';
+      document.getElementById('cancel').innerHTML = 'Você ainda não criou o gabarito.';
+      document.getElementById('cancel').style.display = 'block';
+    }
+  }
+  
+  function setNameGab(name){
+    document.getElementById('resultado').innerHTML = 'Nome: ' + name;
+  }
+  
+  function onSuccess(){
+    document.getElementById('block-confirm').innerHTML = 'As respostas dos alunos estão sendo corrigidas. Em instantes, os e-mails' +
+      ' com o feedback da correção serão enviados.\nClique no X para fechar essa caixa.';
+  }
+  
+  function onFailure(){
+    document.getElementById('resultado').style.color = '#ff0000';
+    document.getElementById('resultado').innerHTML = 'Houve algum problema com a correção... :(';
+    document.getElementById('result-confirm').innerHTML = 'Verifique se você formatou as questões corretamente.'
+    +'<br> Lembre-se que há algumas restrições para utilizar a ferramenta. Estas restrições estão listadas abaixo.'
+    +'<br> Se o problema persistir tente novamente mais tarde.';
+  }
+  
+  function onFailureLoadGab(){
+    document.getElementById('resultado').style.color = '#ff0000';
+    document.getElementById('block-load').style.display = 'none';
+    document.getElementById('cancel').innerHTML = 'Você ainda não criou o gabarito.';
+    document.getElementById('cancel').style.display = 'block';
+  }
+  
+</script>
+
+<script type="text/javascript" src="https://apis.google.com/js/api.js?onload=onApiLoad"></script>
+<link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+</html>
